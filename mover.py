@@ -20,7 +20,7 @@ if not os.path.exists(new_addr):
 defualt_addr = "/Users/hesam/AFRICA/1C"
 
 file_list = [
-    # "1merge_rename.perl",
+    "1merge_rename.perl",
     "2removePZ_forE.perl",
     "2removePZ_forN.perl",
     "2removePZ.perl",
@@ -37,14 +37,12 @@ for i_scr in file_list:
         my_script = file.readlines()
         for count, line in enumerate(my_script):
             if defualt_addr in line:
-                # print(line)
-                # print("><><><><><><><><")
                 my_script[count] = line.replace(defualt_addr, new_addr)
-                # break
+                
 
 
     fo = open(new_addr+'/'+i_scr, "w+")
     fo.writelines(my_script)
     fo.close
+    # files need to be executable, so:
     os.chmod(new_addr+'/'+i_scr, 0o755)
-    # print(my_script)
