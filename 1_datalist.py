@@ -2,13 +2,13 @@ import os
 import obspy
 import numpy as np
 import warnings
-import requests
-import re
-import time
-from bs4 import BeautifulSoup as BS
 
+elevation_dict = {}
 
 def elevation_grabber(station_name):
+    from bs4 import BeautifulSoup as BS
+    import requests
+    import re
 
     req_add = 'http://service.iris.edu/irisws/sacpz/1/query?net=AF&sta=STATION&loc=*&cha=*&nodata=404'
     req_add = req_add.replace('STATION', station_name)
@@ -22,10 +22,9 @@ def elevation_grabber(station_name):
         else:
             soup = BS(resp_sta.text)
             elev = soup.find('elevation').text
-            return elev
+            return str(float(elev))
 
     else:
-        time.sleep(.1)
         ele = re.search('ELEVATION\s+:(.*)\\n', resp_sta.text)
         elev = ele.group(1).strip()
         elev = str(float(elev))
@@ -85,10 +84,14 @@ with open('sta_evt.out', 'w+') as output:
                 stnm = tr[0].stats.sac.kstnm.strip()
                 slat = str(tr[0].stats.sac.stla)
                 slon = str(tr[0].stats.sac.stlo)
-                # sdep = str(tr[0].stats.sac.stel / 1000)
-                print(station)
-                sdep = elevation_grabber(station)
-                time.sleep(.1)
+
+                if tr[0].stats.sac.stel != -12345:
+                    sdep = str(tr[0].stats.sac.stel / 1000)
+                elif station in elevation_dict.keys():
+                    sdep = elevation_dict[station]
+                else:
+                    sdep = elevation_grabber(station)
+                    elevation_dict[station] = sdep
                 azim = str(tr[0].stats.sac.az)
                 garc = str(tr[0].stats.sac.gcarc)
                 originT = tr[0].stats.sac.o
